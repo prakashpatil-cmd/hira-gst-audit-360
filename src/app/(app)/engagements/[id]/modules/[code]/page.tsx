@@ -1,3 +1,4 @@
+import { exceptionLabel } from "@/lib/recon/labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
@@ -92,7 +93,7 @@ export default async function ModulePage({ params }: { params: Promise<{ id: str
           <Section title="Open exceptions by type">
             <Table><THead><TR><TH>Type</TH><TH>Risk</TH><TH className="text-right">Count</TH><TH className="text-right">Tax diff.</TH></TR></THead>
               <TBody>{d.exTypes.length === 0 ? <Empty colSpan={4}>None open.</Empty> : d.exTypes.map((x) => (
-                <TR key={x.exception_type + x.severity}><TD><Link className="text-primary hover:underline" href={`/engagements/${id}/exceptions?type=${x.exception_type}`}>{x.exception_type.replace(/_/g, " ")}</Link></TD>
+                <TR key={x.exception_type + x.severity}><TD><Link className="text-primary hover:underline" href={`/engagements/${id}/exceptions?type=${x.exception_type}`}>{exceptionLabel(x.exception_type)}</Link></TD>
                   <TD><RiskBadge risk={x.severity} /></TD><TD className="num">{x.n}</TD><TD className="num">₹{inr(x.tax, { decimals: 0 })}</TD></TR>))}</TBody></Table>
           </Section>
           <Section title="Observations">

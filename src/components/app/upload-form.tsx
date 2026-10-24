@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useRef, useState } from "react";
+import { startTransition, useActionState, useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/input";
@@ -41,7 +41,8 @@ export function UploadForm({ engagementId, gstins, datasets, action, prepare, de
         fd.set("file_name", file.name);
       }
       setBusy("Reading file…");
-      formAction(fd);
+      // Dispatch inside a transition so the server action's redirect is applied (React 19).
+      startTransition(() => formAction(fd));
     } catch (x) {
       setErr(x instanceof Error ? x.message : String(x));
     } finally {

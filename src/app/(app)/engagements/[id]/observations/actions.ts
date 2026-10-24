@@ -147,7 +147,8 @@ export async function workflowAction(_: ActionState, fd: FormData): Promise<Acti
                 ${d.comment ?? `Moved to ${t.to.replace(/_/g, " ")}`}, ${user.id})`;
     });
     revalidatePath(`/engagements/${d.engagement_id}`, "layout");
-    return { ok: true, message: `Observation moved to ${t.to.replace(/_/g, " ")}.` };
+    // The button that was pressed disappears with the new status, so confirm on the page itself.
+    redirect(`/engagements/${d.engagement_id}/observations/${d.id}?moved=${t.to}`);
   });
 }
 

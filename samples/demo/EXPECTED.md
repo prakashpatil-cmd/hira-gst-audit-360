@@ -1,0 +1,16 @@
+# Demo data — planted exceptions (answer key)
+
+Client: Helix Diagnostics Manufacturing Private Limited (PAN AABCH2468K) — synthetic data.
+GSTINs: Maharashtra 27AABCH2468K1ZD · Karnataka 29AABCH2468K1Z9 · West Bengal 19AABCH2468K1ZA
+Import files 01–11 and 13 against the Maharashtra GSTIN; file 12 against West Bengal (entity-level for 10, 11, 13).
+
+| Reconciliation | Expected exceptions |
+|---|---|
+| Books vs GSTR-1 | MISSING_IN_GSTR1: HDM/2627/0004, HDM/2627/0021 and HDM/2627/0026; UNDER_REPORTED_IN_GSTR1: HDM/2627/0011; GSTIN_MISMATCH: HDM/2627/0016; DUPLICATE_IN_BOOKS: HDM/2627/0031; MISSING_IN_BOOKS: HDM/2627/9001 |
+| GSTR-1 vs GSTR-3B | LIABILITY_SHORT_IN_3B for 05-2026 (IGST −42,000); April shortfall of CGST/SGST 30,000 offset in June (TIMING_DIFFERENCE) |
+| PR vs 2B vs 3B | CLAIMED_NOT_IN_2B ×3 (SWIFT/3, TECHCARE/14, PRECISION/26); DUPLICATE_ITC TECHCARE/18; IN_2B_NOT_IN_BOOKS SWIFT/9911, TECH/7781; ITC_TIME_BARRED REAGENT/OLD/77 |
+| E-invoice | IRN_NOT_IN_GSTR1 for HDM/2627/0026 (and the other invoices missing in GSTR-1) |
+| E-way bills | EWB_TAX_IN_CESS ×3 (HDM/2627/0006, HDM/2627/0007, HDM/2627/0008); EWB_CANCELLED_DISCARDED HDM/2627/0009, HDM/2627/0010; EWB_WITHOUT_SALE HDM/2627/8888; job-work movement HDM/JW/2627/04 |
+| Imports & exports | BOE_ITC_FTWZ BOE 8047642 (ITC 8,77,051 on nil-IGST FTWZ bill of entry); EXPORT_SB_MISSING (3 invoices in Table 6A without shipping bill); EXPORT_96A_3M; ICEGATE / SB_WITHOUT_INVOICE for SB 7047799; DUTY_UNDER_PROTEST BOE 8159669 |
+| Specialist checks | BLOCKED_ITC_17_5 LIFE/KM/552 (key-man insurance); RCM_IMPORT_OF_SERVICES SER/2627/632, SER/2627/1498, BP/2627/358; RCM_NOTIFIED legal fees and rent; CN_BEFORE_INVOICE and CN_HSN_DIFFERS for HDM/CN/2627/01; FA_DISPOSAL FA-0723 |
+| Ledgers | CASH_LEDGER_IDLE West Bengal ₹24,75,430; NEGATIVE_ITC_BALANCE Input IGST |

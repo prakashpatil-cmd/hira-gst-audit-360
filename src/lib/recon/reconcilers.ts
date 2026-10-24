@@ -220,6 +220,7 @@ export function reconPrVs2bVs3b(data: GstinData, ctx: ReconContext): ReconOutput
   const keyWithoutGstin = (d: RDoc) => `${d.docType}|${d.docDate ?? ""}|${d.docNoNorm}`;
   const matches = matchDocuments(books, twoB, { tolerancePaise: ctx.tolerance, key, keyWithoutGstin, fuzzy: true });
   const exceptions: ExceptionDraft[] = [];
+  const boeOnFile = new Set(data.boe.map((b) => b.boeNorm));
   const counts: Record<string, number> = {};
   const bump = (k: string) => (counts[k] = (counts[k] ?? 0) + 1);
 
@@ -241,6 +242,15 @@ export function reconPrVs2bVs3b(data: GstinData, ctx: ReconContext): ReconOutput
     if (m.status === "duplicate_right") { bump("duplicate_2b"); return; }
     if (m.status === "left_only") {
       bump("books_only");
+      // Import of goods: Section 16(2)(aa) does not govern bills of entry. Where the bill of entry is on file the
+      // imports reconciliation (module J) reports it; otherwise flag it for verification against ICEGATE.
+      if (t === "BOE") {
+        const boeNo = String(m.left!.docs[0].meta?.boeNoNorm ?? m.left!.docs[0].docNoNorm);
+        if (claimed > ctx.tolerance && !boeOnFile.has(boeNo)) exceptions.push(ex({ ...base, type: "CLAIMED_NOT_IN_2B", severity: "medium", classification: "requires_investigation",
+          diff: itcDiff(m.left!.docs),
+          description: `IGST credit of ${R(claimed)} claimed on bill of entry ${h.docNo}, which is not reflected in GSTR-2B (IMPG) and no bill of entry record has been provided — verify against ICEGATE.` }));
+        return;
+      }
       if (claimed > ctx.tolerance && !isNote) exceptions.push(ex({ ...base, type: "CLAIMED_NOT_IN_2B", severity: "high", classification: "probable",
         diff: itcDiff(m.left!.docs),
         description: `ITC of ${R(claimed)} claimed on ${docLabel(t).toLowerCase()} ${h.docNo} (${h.name ?? h.gstin ?? "supplier"}) which does not appear in GSTR-2B — Section 16(2)(aa).` }));
@@ -505,10 +515,13 @@ export function reconImportExport(data: GstinData, ctx: ReconContext): ReconOutp
         type: "SB_VALUE_MISMATCH", severity: "low", classification: "requires_investigation", docNo: d.docNo, docDate: d.docDate, sourceIds: [...docs.map((x) => x.id), sb.id],
         diff: { ...zeroDiff(), taxable: agg.taxable - sb.fob },
         description: `Export invoice ${d.docNo}: taxable value ${R(agg.taxable)} vs FOB in shipping bill ${sb.sbNo} ${R(sb.fob)}; reconcile (exchange rate, freight/insurance).` }));
-      if (sb.icegateStatus && !/^(SB000|success|transmitted|ok)/i.test(sb.icegateStatus)) exceptions.push(ex({ module: "H", type: "ICEGATE_NOT_TRANSMITTED",
-        severity: "high", classification: "confirmed", docNo: d.docNo, docDate: d.docDate, sourceIds: [sb.id],
-        description: `Shipping bill ${sb.sbNo} for invoice ${d.docNo} shows ICEGATE status "${sb.icegateStatus}" — data not validated against GSTR-1.` }));
     }
+  }
+  // ICEGATE transmission status, checked on every shipping bill (matched or not)
+  for (const sb of data.sb) {
+    if (sb.icegateStatus && !/^(SB000|success|transmitted|ok)/i.test(sb.icegateStatus)) exceptions.push(ex({ module: "H", type: "ICEGATE_NOT_TRANSMITTED",
+      severity: "high", classification: "confirmed", docNo: sb.invoiceNo, docDate: sb.invoiceDate, sourceIds: [sb.id],
+      description: `Shipping bill ${sb.sbNo} dated ${sb.sbDate}${sb.invoiceNo ? ` (invoice ${sb.invoiceNo})` : ""} shows ICEGATE status "${sb.icegateStatus}" — the export is not validated against GSTR-1 and any IGST refund is withheld.` }));
   }
   const sbOrphans = data.sb.filter((s) => !s.invoiceNorm || !byInv.has(s.invoiceNorm));
   for (const s of sbOrphans) exceptions.push(ex({ module: "H", type: "SB_WITHOUT_INVOICE", severity: "medium", classification: "requires_investigation",

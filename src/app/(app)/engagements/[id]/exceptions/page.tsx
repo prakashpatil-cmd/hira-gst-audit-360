@@ -1,3 +1,4 @@
+import { exceptionLabel } from "@/lib/recon/labels";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/session";
 import { can } from "@/lib/auth/permissions";
@@ -79,7 +80,7 @@ export default async function ExceptionsPage({ params, searchParams }: { params:
               <TR key={x.id}>
                 {triage ? <TD><input type="checkbox" name="ids[]" value={x.id} className="h-4 w-4" aria-label="select" /></TD> : null}
                 <TD><RiskBadge risk={x.severity} /></TD>
-                <TD className="max-w-md"><Link href={`/engagements/${id}/exceptions/${x.id}`} className="font-medium text-hira-800 hover:underline">{x.exception_type.replace(/_/g, " ")}</Link>
+                <TD className="max-w-md"><Link href={`/engagements/${id}/exceptions/${x.id}`} className="font-medium text-hira-800 hover:underline">{exceptionLabel(x.exception_type)}</Link>
                   <div className="line-clamp-2 text-xs text-muted-foreground">{x.description}</div>
                   <div className="text-[10px] text-muted-foreground">Module {x.module}{x.control_id ? ` · ${x.control_id}` : ""}{x.our_gstin ? ` · ${x.our_gstin}` : ""}</div></TD>
                 <TD className="text-xs">{x.doc_no ?? "—"}<div className="text-muted-foreground">{fmtDate(x.doc_date)}</div></TD>

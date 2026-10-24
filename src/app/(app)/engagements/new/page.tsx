@@ -1,4 +1,4 @@
-import { requirePermission } from "@/lib/auth/session";
+import { requirePagePermission } from "@/lib/auth/session";
 import { withUser } from "@/lib/db";
 import { PageHeader } from "@/components/app/page-header";
 import { ActionForm } from "@/components/app/action-form";
@@ -12,7 +12,7 @@ const TYPES = [["health_check", "GST Health Check"], ["annual_return_review", "A
   ["notice_support", "Notice / scrutiny support"], ["special_review", "Special review"], ["refund_review", "Refund review"]];
 
 export default async function NewEngagementPage({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
-  const user = await requirePermission("engagements.manage");
+  const user = await requirePagePermission("engagements.manage");
   const { client } = await searchParams;
   const data = await withUser(user.id, async (tx) => {
     const clients = await tx`select id, legal_name from public.clients where status = 'active' order by legal_name`;

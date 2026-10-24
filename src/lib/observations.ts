@@ -4,6 +4,7 @@ import type { Tx } from "@/lib/db";
 import type { SessionUser } from "@/lib/auth/permissions";
 import { toPaise, paiseToDecimal, formatINR } from "@/lib/gst/money";
 import { financialYear, todayIso, fmtDate } from "@/lib/gst/dates";
+import { exceptionLabel } from "@/lib/recon/labels";
 import { gstr3bDueDate, interestS50, demandLimitation, potentialPenalty, ENGINE_VERSION } from "@/lib/rules/statutory";
 
 export const IMPACT_BUCKETS: Record<string, string> = {
@@ -104,12 +105,12 @@ export async function createObservationFromExceptions(tx: Tx, user: SessionUser,
   const [{ n }] = await tx<{ n: number }[]>`select coalesce(max(obs_number), 0) + 1 n from public.audit_observations where engagement_id = ${engagementId}`;
   const sevOrder = ["critical", "high", "medium", "low", "opportunity"];
   const risk = items.map((i) => i.severity).sort((a, b) => sevOrder.indexOf(a) - sevOrder.indexOf(b))[0];
-  const title = items.length === 1
-    ? `${first.exception_type.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}${first.doc_no ? ` — ${first.doc_no}` : ""}`
-    : `${first.exception_type.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase())} — ${items.length} documents`;
+  const label = exceptionLabel(first.exception_type);
+  const title = items.length === 1 ? `${label}${first.doc_no ? ` — ${first.doc_no}` : ""}`
+    : `${label} — ${items.length} documents${Number(impact.tax) ? `, Rs. ${formatINR(impact.tax, { decimals: 0 })}` : ""}`;
   const lines = items.slice(0, 25).map((i) => `• ${i.doc_no ?? "—"}${i.doc_date ? ` dated ${fmtDate(i.doc_date)}` : ""}${i.counterparty_name ? ` (${i.counterparty_name})` : ""}: ${i.description}`).join("\n");
   const observationText = items.length === 1 ? first.description
-    : `${items.length} exceptions of the type "${types.join(", ").replace(/_/g, " ").toLowerCase()}" were identified from the reconciliation of the records furnished:\n${lines}${items.length > 25 ? `\n… and ${items.length - 25} more (see annexure).` : ""}`;
+    : `${items.length} instances of "${types.map(exceptionLabel).join("; ").toLowerCase()}" were identified from the reconciliation of the records furnished:\n${lines}${items.length > 25 ? `\n… and ${items.length - 25} more (see annexure).` : ""}`;
   const legal = tpl?.legal_framework ?? (refs.length ? refs.map((r) => `• ${r.provision ?? r.code} of the ${r.statute ?? ""} — ${r.title}`).join("\n") : "");
   const quantified = impact.tax > 0 || impact.recoverable > 0 || impact.contingent > 0;
   const implication = quantified

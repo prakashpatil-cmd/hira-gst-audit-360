@@ -18,7 +18,15 @@ const FIELDS: [keyof ReportSnapshot["content"], string, number][] = [
   ["roadmap", "Compliance improvement roadmap — additional text (optional)", 3], ["closing", "Closing", 5],
 ];
 
-export default async function ReportBuilder({ params }: { params: Promise<{ id: string }> }) {
+const DONE: Record<string, string> = {
+  submit: "Submitted for Super Administrator approval.",
+  approve: "Approved and signed. The FINAL report is being generated.",
+  issue: "Marked as issued to the client.",
+  return: "Returned to draft.",
+};
+
+export default async function ReportBuilder({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ done?: string }> }) {
+  const { done } = await searchParams;
   const user = await requireUser();
   const { id } = await params;
   const d = await withUser(user.id, async (tx) => ({
@@ -36,6 +44,7 @@ export default async function ReportBuilder({ params }: { params: Promise<{ id: 
   const hid = (v: { id?: unknown }) => <><input type="hidden" name="engagement_id" value={id} /><input type="hidden" name="version_id" value={String(v.id)} /></>;
   return (
     <div className="space-y-6">
+      {done && DONE[done] ? <p role="status" className="rounded-md border border-hira-200 bg-hira-50 p-3 text-sm text-hira-800">{DONE[done]}</p> : null}
       {d.jobs.map((j) => <JobWatcher key={j.id} jobId={j.id} label="Generating report" />)}
       <Section title="Report builder" description="Reports are generated only from approved observations and their frozen calculation snapshots. Each version keeps its own snapshot; approved versions cannot be changed.">
         <div className="space-y-3 p-5 text-sm">

@@ -29,6 +29,16 @@ describe("Row Level Security — client segregation", () => {
     await expect(withUser(W.auditorA.id, (tx) => tx`insert into public.clients (organisation_id, legal_name, pan) values (${W.orgId}, 'X', 'AABCX1234X')`))
       .rejects.toThrow(/row-level security/);
   });
+  it("a manager creates a client and an engagement through RLS (INSERT … RETURNING)", async () => {
+    const [c] = await withUser(W.manager.id, (tx) => tx<{ id: string }[]>`insert into public.clients (organisation_id, legal_name, pan)
+      values (${W.orgId}, 'Returning Test Ltd', 'AABCR1234R') returning id`);
+    expect(c.id).toBeTruthy();
+    const [e] = await withUser(W.manager.id, (tx) => tx<{ id: string }[]>`insert into public.audit_engagements (organisation_id, client_id, engagement_code, title, financial_year, period_from, period_to)
+      values (${W.orgId}, ${c.id}, 'RLS-RET', 'RLS returning', '2026-27', '2026-04-01', '2026-06-30') returning id`);
+    expect(e.id).toBeTruthy();
+    await serviceSql()`delete from public.audit_engagements where id = ${e.id}`;
+    await serviceSql()`delete from public.clients where id = ${c.id}`;
+  });
   it("client user sees only its own client and no working papers", async () => {
     const clients = await withUser(W.clientA.id, (tx) => tx<{ id: string }[]>`select id from public.clients`);
     expect(clients.map((c) => c.id)).toEqual([W.A.clientId]);
@@ -71,12 +81,12 @@ describe("Import → validate → commit → reconcile", () => {
     expect(imp.status).toBe("validated");
     expect(imp.total_rows).toBe(6);
     expect(imp.rejected_rows).toBe(1);
-    expect(imp.duplicate_rows).toBe(1);
+    expect(imp.duplicate_rows).toBe(0);           // within-file repeat is committed with a warning, not dropped
     expect(imp.quality_report.issues.map((i: { code: string }) => i.code)).toEqual(expect.arrayContaining(["INVALID_DATE", "DUPLICATE_IN_FILE"]));
     await queueCommit(W.auditorA, impId);
     await drainJobs();
     const [{ n }] = await sql<{ n: number }[]>`select count(*)::int n from public.sales_invoices where import_id = ${impId}`;
-    expect(n).toBe(3);
+    expect(n).toBe(4);
     const [cn] = await sql`select * from public.credit_notes where import_id = ${impId}`;
     expect(cn).toMatchObject({ side: "outward", note_no: "CN/01", taxable_value: "5000.00", igst: "900.00" });
 
@@ -100,8 +110,8 @@ describe("Import → validate → commit → reconcile", () => {
     const exs = await sql<{ exception_type: string; doc_no: string; diff_tax: string; source_ids: string[] }[]>`
       select exception_type, doc_no, diff_tax, source_ids from public.reconciliation_exceptions where run_id = ${runId} order by exception_type`;
     const types = exs.map((e) => `${e.exception_type}:${e.doc_no}`);
-    expect(types).toEqual(expect.arrayContaining(["MISSING_IN_GSTR1:INV/002", "UNDER_REPORTED_IN_GSTR1:INV/003", "MISSING_IN_BOOKS:INV/999"]));
-    expect(exs.find((e) => e.doc_no === "INV/003")!.diff_tax).toBe("1600.00");
+    expect(types).toEqual(expect.arrayContaining(["MISSING_IN_GSTR1:INV/002", "UNDER_REPORTED_IN_GSTR1:INV/003", "MISSING_IN_BOOKS:INV/999", "DUPLICATE_IN_BOOKS:INV/003"]));
+    expect(exs.find((e) => e.doc_no === "INV/003" && e.exception_type === "UNDER_REPORTED_IN_GSTR1")!.diff_tax).toBe("1600.00");
     // drill-down: the exception points at the original source rows
     const src = await sql`select row_number, raw from public.source_transactions where id = any(${exs.find((e) => e.doc_no === "INV/002")!.source_ids}::uuid[])`;
     expect(src[0].raw["Invoice No"]).toBe("INV/002");

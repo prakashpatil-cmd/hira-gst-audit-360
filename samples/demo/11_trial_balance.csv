@@ -1,0 +1,6 @@
+Particulars,Group,Opening,Debit,Credit,Closing
+Sales — Domestic,Sales Accounts,0,0,11878119.34,-11878119.34
+Sales — Export,Sales Accounts,0,0,4250000,-4250000
+Input IGST,Duties & Taxes,0,400000,412500,-12500
+Input CGST,Duties & Taxes,0,260000,210000,50000
+Output IGST,Duties & Taxes,0,0,900000,-900000

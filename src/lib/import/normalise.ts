@@ -306,20 +306,27 @@ function isZeroRatedOrExempt(common: NormalisedRow["common"], extra: NormalisedR
   return /export|sez|exempt|nil|non.?gst|deemed|zero/.test(st) || /^6[AB]/.test(tc) || tc === "8" || common.place_of_supply === "96" || common.place_of_supply === "97";
 }
 
-/** Second pass: marks repeated fingerprints within the same file as duplicates. */
+/**
+ * Second pass for duplicates.
+ *  - Identical to a document already committed from an earlier upload (append mode): status
+ *    "duplicate" — an upload artefact, excluded from commit but kept and reported.
+ *  - Repeated within the same file: kept as a "warning" and committed, because a document entered
+ *    twice in the books (or reported twice in a return) is itself an audit finding — the
+ *    reconciliation raises it as DUPLICATE_IN_BOOKS / DUPLICATE_ITC / DUPLICATE_IN_GSTR1.
+ */
 export function markDuplicates(rows: NormalisedRow[], existing: Set<string> = new Set(), rowNumbers?: number[]): void {
   const seen = new Map<string, number>();
   rows.forEach((r, idx) => {
     if (!r.fingerprint || r.status === "rejected") return;
     if (existing.has(r.fingerprint)) {
       r.status = "duplicate";
-      r.issues.push({ severity: "warning", code: "DUPLICATE_PREVIOUS_IMPORT", message: "Identical document already committed from an earlier import" });
+      r.issues.push({ severity: "warning", code: "DUPLICATE_PREVIOUS_IMPORT", message: "Identical document already committed from an earlier import — not committed again" });
       return;
     }
     const first = seen.get(r.fingerprint);
     if (first != null) {
-      r.status = "duplicate";
-      r.issues.push({ severity: "warning", code: "DUPLICATE_IN_FILE", message: `Identical to source row ${rowNumbers ? rowNumbers[first] : first + 1} in this file` });
+      r.status = "warning";
+      r.issues.push({ severity: "warning", code: "DUPLICATE_IN_FILE", message: `Identical to source row ${rowNumbers ? rowNumbers[first] : first + 1} in this file — committed and flagged for the duplicate check` });
     } else seen.set(r.fingerprint, idx);
   });
 }

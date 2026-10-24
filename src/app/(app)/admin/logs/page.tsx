@@ -1,4 +1,4 @@
-import { requirePermission } from "@/lib/auth/session";
+import { requirePagePermission } from "@/lib/auth/session";
 import { withUser } from "@/lib/db";
 import { fmtDateTime } from "@/lib/gst/dates";
 import { PageHeader, Section, Pager } from "@/components/app/page-header";
@@ -11,7 +11,7 @@ export const metadata = { title: "Security and audit logs" };
 const PAGE = 100;
 
 export default async function LogsPage({ searchParams }: { searchParams: Promise<{ entity?: string; action?: string; page?: string; tab?: string }> }) {
-  const admin = await requirePermission("logs.view");
+  const admin = await requirePagePermission("logs.view");
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page ?? 1));
   const tab = sp.tab ?? "audit";

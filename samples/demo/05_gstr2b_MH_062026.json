@@ -1,0 +1,307 @@
+{
+ "chksum": "demo",
+ "data": {
+  "gstin": "27AABCH2468K1ZD",
+  "rtnprd": "062026",
+  "version": "1.0",
+  "gendt": "14-07-2026",
+  "docdata": {
+   "b2b": [
+    {
+     "ctin": "27AAFCR6666R1ZD",
+     "trdnm": "Reagent Chem Industries",
+     "supfildt": "11-07-2026",
+     "supprd": "062026",
+     "inv": [
+      {
+       "inum": "REAGENT/21",
+       "typ": "R",
+       "dt": "08-06-2026",
+       "val": 50755.42,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 43013.06,
+         "igst": 0,
+         "cgst": 3871.18,
+         "sgst": 3871.18,
+         "cess": 0
+        }
+       ]
+      },
+      {
+       "inum": "REAGENT/25",
+       "typ": "R",
+       "dt": "08-06-2026",
+       "val": 110058.33,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 93269.77,
+         "igst": 0,
+         "cgst": 8394.28,
+         "sgst": 8394.28,
+         "cess": 0
+        }
+       ]
+      },
+      {
+       "inum": "REAGENT/29",
+       "typ": "R",
+       "dt": "02-06-2026",
+       "val": 216670.27,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 183618.87,
+         "igst": 0,
+         "cgst": 16525.7,
+         "sgst": 16525.7,
+         "cess": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ctin": "27AABFP7777S1Z5",
+     "trdnm": "Precision Packaging Co",
+     "supfildt": "11-07-2026",
+     "supprd": "062026",
+     "inv": [
+      {
+       "inum": "PRECISION/22",
+       "typ": "R",
+       "dt": "12-06-2026",
+       "val": 194792.5,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 165078.38,
+         "igst": 0,
+         "cgst": 14857.06,
+         "sgst": 14857.06,
+         "cess": 0
+        }
+       ]
+      },
+      {
+       "inum": "PRECISION/30",
+       "typ": "R",
+       "dt": "18-06-2026",
+       "val": 158576.09,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 134386.51,
+         "igst": 0,
+         "cgst": 12094.79,
+         "sgst": 12094.79,
+         "cess": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ctin": "27AAECS8888T1ZX",
+     "trdnm": "Swift Logistics Pvt Ltd",
+     "supfildt": "11-07-2026",
+     "supprd": "062026",
+     "inv": [
+      {
+       "inum": "SWIFT/23",
+       "typ": "R",
+       "dt": "08-06-2026",
+       "val": 46394.8,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 39317.62,
+         "igst": 0,
+         "cgst": 3538.59,
+         "sgst": 3538.59,
+         "cess": 0
+        }
+       ]
+      },
+      {
+       "inum": "SWIFT/27",
+       "typ": "R",
+       "dt": "15-06-2026",
+       "val": 185001.2,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 156780.68,
+         "igst": 0,
+         "cgst": 14110.26,
+         "sgst": 14110.26,
+         "cess": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ctin": "29AAFFT9999U1ZD",
+     "trdnm": "TechCare Services",
+     "supfildt": "11-07-2026",
+     "supprd": "062026",
+     "inv": [
+      {
+       "inum": "TECHCARE/24",
+       "typ": "R",
+       "dt": "24-06-2026",
+       "val": 115774.94,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 98114.36,
+         "igst": 17660.58,
+         "cgst": 0,
+         "sgst": 0,
+         "cess": 0
+        }
+       ]
+      },
+      {
+       "inum": "TECHCARE/28",
+       "typ": "R",
+       "dt": "17-06-2026",
+       "val": 107428.07,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 91040.74,
+         "igst": 16387.33,
+         "cgst": 0,
+         "sgst": 0,
+         "cess": 0
+        }
+       ]
+      },
+      {
+       "inum": "TECH/7781",
+       "typ": "R",
+       "dt": "09-06-2026",
+       "val": 35400,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 30000,
+         "igst": 5400,
+         "cgst": 0,
+         "sgst": 0,
+         "cess": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ctin": "27AAACL1212V1Z8",
+     "trdnm": "Lifeline Insurance Co Ltd",
+     "supfildt": "11-07-2026",
+     "supprd": "062026",
+     "inv": [
+      {
+       "inum": "LIFE/KM/552",
+       "typ": "R",
+       "dt": "30-06-2026",
+       "val": 236000,
+       "pos": "27",
+       "rev": "N",
+       "itcavl": "Y",
+       "rsn": "",
+       "diffprcnt": 1,
+       "srctyp": "e-Invoice",
+       "items": [
+        {
+         "num": 1,
+         "rt": 18,
+         "txval": 200000,
+         "igst": 0,
+         "cgst": 18000,
+         "sgst": 18000,
+         "cess": 0
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "impg": []
+  }
+ }
+}

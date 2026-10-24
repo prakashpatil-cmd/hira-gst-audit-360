@@ -11,6 +11,7 @@ import type { RDoc, MatchResult, Agg } from "./match";
 import type { GstinData, LedgerRow, ReconContext, ReconOutput, ExceptionDraft } from "./types";
 import { reconBooksVsGstr1, reconGstr1VsGstr3b, reconPrVs2bVs3b, reconEinvoice, reconEwayBills, reconImportExport, reconTrialBalance } from "./reconcilers";
 import { runSpecialChecks } from "./checks";
+import { indianDates } from "./labels";
 
 export const RECON_TYPES = {
   BOOKS_GSTR1: { label: "Books vs GSTR-1", module: "B", needs: ["sales_register", "gstr1"] },
@@ -244,7 +245,7 @@ async function persist(sql: Sql, run: Row, results: { gstinId: string | null; ou
           organisation_id: run.organisation_id, run_id: run.id, engagement_id: run.engagement_id, client_gstin_id: gstinId, recon_type: run.recon_type,
           exception_type: e.type, module: e.module, control_id: e.controlId ?? controlFor(e.type), severity: e.severity,
           match_id: e.matchIndex != null ? matchIds[e.matchIndex] ?? null : null, doc_no: e.docNo ?? null, doc_date: e.docDate ?? null,
-          counterparty_gstin: e.gstin ?? null, counterparty_name: e.name ?? null, period: e.period ?? null, description: e.description,
+          counterparty_gstin: e.gstin ?? null, counterparty_name: e.name ?? null, period: e.period ?? null, description: indianDates(e.description),
           diff_taxable: paiseToDecimal(e.diff.taxable), diff_igst: paiseToDecimal(e.diff.igst), diff_cgst: paiseToDecimal(e.diff.cgst),
           diff_sgst: paiseToDecimal(e.diff.sgst), diff_cess: paiseToDecimal(e.diff.cess), diff_tax: paiseToDecimal(e.diff.tax),
           source_ids: e.sourceIds, status: "open", classification: e.classification as string | null, assigned_to: null as string | null,

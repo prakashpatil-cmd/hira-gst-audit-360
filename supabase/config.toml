@@ -1,0 +1,37 @@
+# Supabase CLI configuration for HIRA GST Audit 360°.
+# `supabase link --project-ref <ref>` then `supabase db push` applies supabase/migrations.
+project_id = "hira-gst-audit-360"
+
+[api]
+enabled = true
+schemas = ["public"]          # PostgREST is not used by the app; the server connects to Postgres directly
+max_rows = 1000
+
+[db]
+major_version = 15
+
+[storage]
+enabled = true
+file_size_limit = "100MiB"     # bucket "audit-files" is created private by migration 20261024000006
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://*.vercel.app/auth/callback"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = false          # users are created only by a Super Administrator
+minimum_password_length = 10
+password_requirements = "lower_upper_letters_digits_symbols"
+
+[auth.mfa]
+max_enrolled_factors = 10
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[auth.email]
+enable_signup = false
+double_confirm_changes = true
+enable_confirmations = true
+secure_password_change = true

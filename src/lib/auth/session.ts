@@ -66,6 +66,13 @@ export async function requirePermission(perm: Permission): Promise<SessionUser> 
   return u;
 }
 
+/** For pages: users without the permission are sent to the dashboard with a notice (no error page). */
+export async function requirePagePermission(perm: Permission): Promise<SessionUser> {
+  const u = await requireUser({ allowClient: perm.startsWith("portal.") });
+  if (!can(u, perm)) redirect(`/dashboard?denied=${encodeURIComponent(perm)}`);
+  return u;
+}
+
 export class ForbiddenError extends Error {
   status = 403;
 }

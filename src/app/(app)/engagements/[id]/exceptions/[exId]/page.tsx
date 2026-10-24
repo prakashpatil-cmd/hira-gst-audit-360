@@ -1,3 +1,4 @@
+import { exceptionLabel } from "@/lib/recon/labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
@@ -38,7 +39,7 @@ export default async function ExceptionDetail({ params }: { params: Promise<{ id
     <div className="space-y-6">
       <div>
         <Link href={`/engagements/${id}/exceptions`} className="text-xs text-muted-foreground hover:underline">← Exception register</Link>
-        <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold text-hira-800">{x.exception_type.replace(/_/g, " ")} <RiskBadge risk={x.severity} /> <StatusBadge status={x.status} /></h2>
+        <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold text-hira-800">{exceptionLabel(x.exception_type)} <RiskBadge risk={x.severity} /> <StatusBadge status={x.status} /></h2>
         <p className="text-sm">{x.description}</p>
         <p className="mt-1 text-xs text-muted-foreground">Module {x.module}{x.control_id ? <> · control <Link className="text-primary hover:underline" href={`/engagements/${id}/checklist/${x.control_id}`}>{x.control_id}</Link></> : null}
           {" "}· {x.our_gstin ?? "entity"} · run <Link className="text-primary hover:underline" href={`/engagements/${id}/reconciliation/${x.run_id}`}>{x.recon_type}</Link>{x.is_current ? "" : " (superseded)"}

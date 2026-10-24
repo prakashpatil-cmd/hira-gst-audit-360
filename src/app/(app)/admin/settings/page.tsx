@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { requirePermission } from "@/lib/auth/session";
+import { requirePagePermission } from "@/lib/auth/session";
 import { getSettings } from "@/lib/settings";
 import { env } from "@/lib/env";
 import { PageHeader, Section } from "@/components/app/page-header";
@@ -10,7 +10,7 @@ import { saveSettingsAction } from "../actions";
 export const metadata = { title: "System settings" };
 
 export default async function SettingsPage() {
-  const admin = await requirePermission("settings.manage");
+  const admin = await requirePagePermission("settings.manage");
   const s = await getSettings(admin.orgId);
   const e = env();
   return (

@@ -1,4 +1,5 @@
 "use server";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { withUser } from "@/lib/db";
@@ -94,7 +95,8 @@ export async function reportWorkflowAction(_: ActionState, fd: FormData): Promis
     });
     if (jobId) await kickJob(jobId);
     revalidatePath(`/engagements/${d.engagement_id}`, "layout");
-    return { ok: true, message: d.op === "approve" ? "Approved and signed. The FINAL report is being generated." : "Done." };
+    // The pressed button disappears with the new status, so confirm on the page itself.
+    redirect(`/engagements/${d.engagement_id}/reports?done=${d.op}`);
   });
 }
 

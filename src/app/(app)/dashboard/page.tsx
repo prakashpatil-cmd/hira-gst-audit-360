@@ -11,7 +11,8 @@ import { StatusBadge } from "@/components/ui/badge";
 export const metadata = { title: "Firm dashboard" };
 const REPORTED = "('approved','shared_with_client','client_responded','final','resolved')";
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
+  const { denied } = await searchParams;
   const user = await requireUser();
   const d = await withUser(user.id, async (tx) => {
     const [k] = await tx`select
@@ -61,6 +62,7 @@ export default async function Dashboard() {
   const avg = d.completion.length ? Math.round(d.completion.reduce((s, c) => s + (c.applicable ? c.tested / c.applicable : 0), 0) / d.completion.length * 100) : 0;
   return (
     <>
+      {denied ? <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">You do not have permission to open that page ({denied}).</p> : null}
       <PageHeader title="Firm dashboard" description={`Welcome, ${user.fullName}. Figures are limited to the engagements you can access and drill down to the underlying records.`} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         <Stat label="Clients" value={k.clients} href="/clients" />

@@ -18,7 +18,8 @@ import { saveObservationAction, saveImpactAction, workflowAction, addEvidenceAct
 
 const WF = ["not_started", "data_awaited", "in_progress", "exception_detected", "under_investigation", "pending_client", "pending_review", "confirmed_observation", "resolved", "closed", "not_applicable"];
 
-export default async function ObservationEditor({ params }: { params: Promise<{ id: string; obsId: string }> }) {
+export default async function ObservationEditor({ params, searchParams }: { params: Promise<{ id: string; obsId: string }>; searchParams: Promise<{ moved?: string }> }) {
+  const { moved } = await searchParams;
   const user = await requireUser();
   const { id, obsId } = await params;
   const e = await getEngagement(user, id);
@@ -61,6 +62,7 @@ export default async function ObservationEditor({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
+      {moved && /^[a-z_]+$/.test(moved) ? <p role="status" className="rounded-md border border-hira-200 bg-hira-50 p-3 text-sm text-hira-800">Observation moved to {moved.replace(/_/g, " ")}.</p> : null}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href={`/engagements/${id}/observations`} className="text-xs text-muted-foreground hover:underline">← Observations</Link>

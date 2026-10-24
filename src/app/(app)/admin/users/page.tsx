@@ -1,4 +1,4 @@
-import { requirePermission } from "@/lib/auth/session";
+import { requirePagePermission } from "@/lib/auth/session";
 import { withUser } from "@/lib/db";
 import { ROLE_LABELS } from "@/lib/auth/permissions";
 import { fmtDateTime } from "@/lib/gst/dates";
@@ -12,7 +12,7 @@ import { createUserAction, updateUserAction } from "../actions";
 export const metadata = { title: "User administration" };
 
 export default async function UsersPage() {
-  const admin = await requirePermission("users.manage");
+  const admin = await requirePagePermission("users.manage");
   const { users, clients } = await withUser(admin.id, async (tx) => ({
     users: await tx`select u.*, m.role_code, c.legal_name client from public.users u join public.memberships m on m.user_id = u.id and m.organisation_id = ${admin.orgId}
       left join public.clients c on c.id = m.client_id order by (m.role_code = 'client_user'), u.full_name`,

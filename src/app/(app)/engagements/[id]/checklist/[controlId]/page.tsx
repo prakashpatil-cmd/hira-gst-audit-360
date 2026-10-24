@@ -1,3 +1,4 @@
+import { exceptionLabel } from "@/lib/recon/labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
@@ -60,7 +61,7 @@ export default async function ControlWorkingPaper({ params }: { params: Promise<
           <Section title="Automated results">
             <div className="p-5 text-sm">
               {t.automation ? <p className="mb-2 text-muted-foreground">Linked to {t.automation.engine === "recon" ? `reconciliation ${t.automation.type}` : `check ${t.automation.key}`}.</p> : <p className="text-muted-foreground">Manual control — record your work below.</p>}
-              {d.exs.length ? <ul className="space-y-1">{d.exs.map((x) => <li key={x.exception_type + x.severity}><Link className="text-primary hover:underline" href={`/engagements/${id}/exceptions?type=${x.exception_type}`}>{x.exception_type.replace(/_/g, " ")}</Link> — {x.n} <RiskBadge risk={x.severity} /></li>)}</ul> : null}
+              {d.exs.length ? <ul className="space-y-1">{d.exs.map((x) => <li key={x.exception_type + x.severity}><Link className="text-primary hover:underline" href={`/engagements/${id}/exceptions?type=${x.exception_type}`}>{exceptionLabel(x.exception_type)}</Link> — {x.n} <RiskBadge risk={x.severity} /></li>)}</ul> : null}
             </div>
           </Section>
           <Section title="Working paper">
