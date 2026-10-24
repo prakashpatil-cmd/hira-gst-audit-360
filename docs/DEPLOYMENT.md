@@ -2,7 +2,17 @@
 
 Environments: **dev** (local Postgres, `AUTH_PROVIDER=local`), **staging** and **production** (Supabase + Vercel, `AUTH_PROVIDER=supabase`). Use separate Supabase projects for staging and production.
 
-## 1. Supabase
+## 0. Quick path (no command line needed)
+
+1. **Supabase** → New project (region **Mumbai / ap-south-1**). Then **SQL Editor → New query**, paste the whole of `supabase/setup.sql`, **Run** (schema, RLS, storage bucket and base seed in one go).
+2. **Authentication → Users → Add user → Create new user** (your e-mail, strong password, *Auto Confirm User*). Then run `supabase/link-admin.sql` in the SQL Editor (edit the e-mail inside first if different) — this makes that login the Super Administrator.
+3. **Authentication → Sign In / Providers**: turn **off** "Allow new users to sign up". **Authentication → URL Configuration**: Site URL `https://hira-gst-audit-360.vercel.app`, Redirect URL `https://hira-gst-audit-360.vercel.app/auth/callback`.
+4. **Vercel → project hira-gst-audit-360 → Settings → Environment Variables** (Production and Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Supabase → Project Settings → API), `SUPABASE_SERVICE_ROLE_KEY` (same page, mark *Sensitive*), `DATABASE_URL` = the **Transaction pooler** connection string from Supabase → Connect (port 6543, with your database password; mark *Sensitive*). `APP_ENV`, `APP_URL`, `AUTH_PROVIDER=supabase`, `STORAGE_PROVIDER=supabase`, `INLINE_JOBS=false`, `SESSION_SECRET` and `CRON_SECRET` are already set.
+5. Connect the GitHub repository to the Vercel project and deploy. The `NEXT_PUBLIC_*` values are built into the page, so set them **before** the first deployment (or redeploy after setting them).
+
+`vercel.json` runs the background-job cron once a day (the Hobby plan limit); jobs normally start immediately after each request. On Vercel Pro you can change the schedule to `*/5 * * * *`.
+
+## 1. Supabase (command-line alternative)
 
 1. Create a project (region: Mumbai `ap-south-1` recommended for data residency).
 2. Apply migrations: `supabase link --project-ref <ref> && supabase db push` (or `DATABASE_URL=<direct connection> npm run db:migrate` — do **not** set `DB_LOCAL_SHIM` against Supabase).
@@ -15,7 +25,7 @@ Environments: **dev** (local Postgres, `AUTH_PROVIDER=local`), **staging** and *
 1. Import the GitHub repository; framework Next.js.
 2. Environment variables (Production and Preview separately) — see `.env.example`:
    `APP_ENV=production, APP_URL, DATABASE_URL (pooled, port 6543), AUTH_PROVIDER=supabase, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, STORAGE_PROVIDER=supabase, SESSION_SECRET, CRON_SECRET, INLINE_JOBS=false`, optionally `AI_PROVIDER=anthropic, ANTHROPIC_API_KEY, CLAMAV_HOST`.
-3. `vercel.json` schedules `/api/cron/jobs` every 5 minutes (authorised by `CRON_SECRET`). Jobs are also kicked immediately after queueing via `after()`.
+3. `vercel.json` schedules `/api/cron/jobs` daily (Hobby plan limit; authorised by `CRON_SECRET`). Jobs are also kicked immediately after queueing via `after()`.
 4. For large engagements run a dedicated worker (`npm run worker`) on a container host with the same env; it drains the same durable queue.
 
 ## 3. Verification (prompt §23 step 20)
