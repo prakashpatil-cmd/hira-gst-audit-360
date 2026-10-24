@@ -7,6 +7,7 @@ create table if not exists local_auth.credentials (
   user_id uuid primary key references auth.users(id) on delete cascade,
   password_hash text not null,          -- scrypt$N$r$p$salt$hash
   totp_secret text,                     -- base32, null = MFA not enrolled
+  pending_totp_secret text,             -- secret awaiting first-code confirmation
   failed_attempts int not null default 0,
   locked_until timestamptz,
   updated_at timestamptz not null default now()

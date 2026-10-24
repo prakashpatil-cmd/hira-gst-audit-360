@@ -130,14 +130,18 @@ async function contextFor(sql: Sql, engagementId: string, gstinId: string | null
 }
 
 export async function queueRecon(user: SessionUser, engagementId: string, reconType: ReconType, params: Record<string, unknown> = {}): Promise<string> {
+  return (await queueReconWithJob(user, engagementId, reconType, params)).runId;
+}
+
+export async function queueReconWithJob(user: SessionUser, engagementId: string, reconType: ReconType, params: Record<string, unknown> = {}): Promise<{ runId: string; jobId: string }> {
   if (!(reconType in RECON_TYPES)) throw new Error("Unknown reconciliation type");
   return withUser(user.id, async (tx) => {
     const [e] = await tx<{ organisation_id: string }[]>`select organisation_id from public.audit_engagements where id = ${engagementId}`;
     if (!e) throw new Error("Engagement not found");
     const [run] = await tx<{ id: string }[]>`insert into public.reconciliation_runs (organisation_id, engagement_id, recon_type, status, params, engine_version, created_by)
       values (${e.organisation_id}, ${engagementId}, ${reconType}, 'queued', ${tx.json(params as never)}, ${ENGINE_VERSION}, ${user.id}) returning id`;
-    await enqueueJob(tx, { organisationId: e.organisation_id, engagementId, type: "recon.run", payload: { runId: run.id }, createdBy: user.id });
-    return run.id;
+    const jobId = await enqueueJob(tx, { organisationId: e.organisation_id, engagementId, type: "recon.run", payload: { runId: run.id }, createdBy: user.id });
+    return { runId: run.id, jobId };
   });
 }
 

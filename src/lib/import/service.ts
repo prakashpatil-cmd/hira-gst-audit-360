@@ -31,24 +31,32 @@ async function loadImport(sql: Sql | Tx, importId: string): Promise<ImportRecord
 
 /** Stores an uploaded file privately and records it (RLS-checked insert). */
 export async function storeDocument(tx: Tx, user: SessionUser, a: { clientId: string; engagementId: string | null;
-  kind: string; fileName: string; body: Buffer; description?: string }): Promise<{ id: string; sha256: string; mime: string }> {
+  kind: string; fileName: string; body: Buffer; description?: string; preUploadedKey?: string }): Promise<{ id: string; sha256: string; mime: string }> {
   const check = inspectUpload(a.fileName, a.body);
-  if (!check.ok) throw new Error(check.reason);
+  if (!check.ok) {
+    if (a.preUploadedKey) await objectStore().remove(a.preUploadedKey);
+    throw new Error(check.reason);
+  }
   const scan = await scanForMalware(a.body);
-  if (scan === "infected") throw new Error("The file failed the malware scan and was not stored.");
+  if (scan === "infected") {
+    if (a.preUploadedKey) await objectStore().remove(a.preUploadedKey);
+    throw new Error("The file failed the malware scan and was not stored.");
+  }
   const sha = createHash("sha256").update(a.body).digest("hex");
   const id = randomUUID();
-  const key = `${user.orgId}/${a.clientId}/${a.engagementId ?? "client"}/${a.kind}/${id}-${safeFileName(a.fileName)}`;
+  const prefix = `${user.orgId}/${a.clientId}/${a.engagementId ?? "client"}/`;
+  if (a.preUploadedKey && !a.preUploadedKey.startsWith(`${prefix}staging/`)) throw new Error("Upload key does not belong to this engagement");
+  const key = a.preUploadedKey ?? `${prefix}${a.kind}/${id}-${safeFileName(a.fileName)}`;
   await tx`insert into public.source_documents (id, organisation_id, client_id, engagement_id, kind, storage_path, file_name, mime_type,
       size_bytes, sha256, scan_status, description, uploaded_by)
     values (${id}, ${user.orgId}, ${a.clientId}, ${a.engagementId}, ${a.kind}, ${key}, ${a.fileName}, ${check.mime},
       ${a.body.length}, ${sha}, ${scan}, ${a.description ?? null}, ${user.id})`;
-  await objectStore().put(key, a.body, check.mime);   // after the RLS-checked insert succeeded
+  if (!a.preUploadedKey) await objectStore().put(key, a.body, check.mime);   // after the RLS-checked insert succeeded
   return { id, sha256: sha, mime: check.mime };
 }
 
 export async function createImport(user: SessionUser, a: { engagementId: string; clientGstinId: string | null; datasetType: string;
-  fileName: string; body: Buffer }): Promise<string> {
+  fileName: string; body: Buffer; preUploadedKey?: string }): Promise<string> {
   const dataset = getDataset(a.datasetType);
   if (dataset.perGstin && !a.clientGstinId) throw new Error(`${dataset.label} must be imported against a GSTIN`);
   const table = await parseFile(a.fileName, a.body, { maxRows: 50 });   // header detection only
@@ -60,7 +68,8 @@ export async function createImport(user: SessionUser, a: { engagementId: string;
       const [ok] = await tx`select 1 from public.engagement_gstins where engagement_id = ${a.engagementId} and client_gstin_id = ${a.clientGstinId}`;
       if (!ok) throw new Error("This GSTIN is not part of the engagement scope");
     }
-    const doc = await storeDocument(tx, user, { clientId: eng.client_id, engagementId: a.engagementId, kind: "import_file", fileName: a.fileName, body: a.body });
+    const doc = await storeDocument(tx, user, { clientId: eng.client_id, engagementId: a.engagementId, kind: "import_file", fileName: a.fileName, body: a.body,
+      preUploadedKey: a.preUploadedKey });
     // Prefer the client's saved mapping template whose columns are all present in this file.
     const templates = await tx<{ id: string; column_map: Record<string, string>; sheet_name: string | null; header_row: number; options: ImportOptions }[]>`
       select id, column_map, sheet_name, header_row, options from public.import_mappings

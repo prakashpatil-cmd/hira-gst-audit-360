@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 15% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 16%;
+    --primary: 89 53% 35%;            /* HIRA green #5A8A2A (accessible on white) */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 90 30% 95%;
+    --secondary-foreground: 89 53% 22%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 40%;
+    --accent: 89 47% 93%;
+    --accent-foreground: 89 53% 22%;
+    --destructive: 4 70% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 89%;
+    --input: 220 13% 85%;
+    --ring: 89 53% 35%;
+    --radius: 0.5rem;
+    --font-sans: "Segoe UI", Calibri, "Helvetica Neue", Arial, system-ui, sans-serif;
+  }
+  * { @apply border-border; }
+  body { @apply bg-[#f6f7f5] text-foreground antialiased; font-feature-settings: "tnum" 1; }
+  h1, h2, h3 { @apply tracking-tight; }
+}
+
+@layer components {
+  .num { font-variant-numeric: tabular-nums; @apply text-right whitespace-nowrap; }
+  .field-label { @apply text-xs font-medium text-muted-foreground uppercase tracking-wide; }
+}

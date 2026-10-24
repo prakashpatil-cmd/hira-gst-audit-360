@@ -1,0 +1,13 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Carlito fonts
+Source: https://github.com/googlefonts/carlito
+
+Files: *
+Copyright: 2010-2013 by tyPoland Lukasz Dziedzic with Reserved Font Name "Carlito".
+License: OFL-1.1
+ Copyright (c) 2010-2013 by tyPoland Lukasz Dziedzic with Reserved Font Name "Carlito".
+ .
+ This Font Software is licensed under the SIL Open Font License,
+ Version 1.1 as shown below.
+ .
+Carlito is licensed under the SIL Open Font License 1.1 (https://openfontlicense.org).

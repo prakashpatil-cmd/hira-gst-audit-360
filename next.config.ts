@@ -10,7 +10,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  serverExternalPackages: ["@react-pdf/renderer", "exceljs", "postgres"],
+  serverExternalPackages: ["exceljs", "postgres"],
   experimental: { serverActions: { bodySizeLimit: "50mb" } },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
