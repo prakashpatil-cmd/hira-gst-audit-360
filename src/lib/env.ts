@@ -24,12 +24,39 @@ const schema = z.object({
 });
 
 export type Env = z.infer<typeof schema>;
+
+/**
+ * Accepts the variable names written by the Supabase ↔ Vercel integration (POSTGRES_URL, SUPABASE_URL,
+ * publishable/secret keys) as well as our own, so the integration can configure a deployment without copying keys.
+ */
+export function withAliases(src: NodeJS.ProcessEnv): Record<string, string | undefined> {
+  const pick = (...keys: string[]) => keys.map((k) => src[k]).find((v) => v && v.trim()) || undefined;
+  return {
+    ...src,
+    DATABASE_URL: normaliseDbUrl(pick("DATABASE_URL", "POSTGRES_URL")),
+    NEXT_PUBLIC_SUPABASE_URL: pick("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: pick("NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY"),
+    SUPABASE_SERVICE_ROLE_KEY: pick("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY"),
+  };
+}
+
+/** Keeps only sslmode from the query string (other parameters would be sent to Postgres as settings) and requires TLS for Supabase hosts. */
+export function normaliseDbUrl(raw: string | undefined): string | undefined {
+  if (!raw) return raw;
+  let u: URL;
+  try { u = new URL(raw); } catch { return raw; }
+  const sslmode = u.searchParams.get("sslmode");
+  u.search = "";
+  if (sslmode) u.searchParams.set("sslmode", sslmode);
+  else if (/\.supabase\.(co|com)$/.test(u.hostname)) u.searchParams.set("sslmode", "require");
+  return u.toString();
+}
 let cached: Env | null = null;
 
 /** Server-only environment. Throws on misconfiguration rather than running insecurely. */
 export function env(): Env {
   if (cached) return cached;
-  const parsed = schema.safeParse(process.env);
+  const parsed = schema.safeParse(withAliases(process.env));
   if (!parsed.success) {
     throw new Error("Invalid environment: " + parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "));
   }
