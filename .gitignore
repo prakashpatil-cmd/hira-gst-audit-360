@@ -4,11 +4,11 @@ out
 .env
 .env.local
 .env.*.local
-storage/
+/storage/
 coverage
 playwright-report
 test-results
 *.tsbuildinfo
 next-env.d.ts
-storage-test/
-storage-e2e/
+/storage-test/
+/storage-e2e/
