@@ -4,7 +4,7 @@ Environments: **dev** (local Postgres, `AUTH_PROVIDER=local`), **staging** and *
 
 ## 0. Quick path (no command line needed)
 
-1. **Supabase** → New project (region **Mumbai / ap-south-1**). Then **SQL Editor → New query**, paste the whole of `supabase/setup.sql`, **Run** (schema, RLS, storage bucket and base seed in one go).
+1. **Supabase** → New project (region **Mumbai / ap-south-1**). Then **SQL Editor → New query**, paste and **Run** each file in `supabase/setup/` in order (part1 … part5), one query at a time — paste the file *contents*, not its name. (`supabase/setup.sql` is the same thing as a single file, for tools that can run large scripts.).
 2. **Authentication → Users → Add user → Create new user** (your e-mail, strong password, *Auto Confirm User*). Then run `supabase/link-admin.sql` in the SQL Editor (edit the e-mail inside first if different) — this makes that login the Super Administrator.
 3. **Authentication → Sign In / Providers**: turn **off** "Allow new users to sign up". **Authentication → URL Configuration**: Site URL `https://hira-gst-audit-360.vercel.app`, Redirect URL `https://hira-gst-audit-360.vercel.app/auth/callback`.
 4. **Vercel → project hira-gst-audit-360 → Settings → Environment Variables** (Production and Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Supabase → Project Settings → API), `SUPABASE_SERVICE_ROLE_KEY` (same page, mark *Sensitive*), `DATABASE_URL` = the **Transaction pooler** connection string from Supabase → Connect (port 6543, with your database password; mark *Sensitive*). `APP_ENV`, `APP_URL`, `AUTH_PROVIDER=supabase`, `STORAGE_PROVIDER=supabase`, `INLINE_JOBS=false`, `SESSION_SECRET` and `CRON_SECRET` are already set.
