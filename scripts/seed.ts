@@ -40,9 +40,14 @@ async function main() {
             ${sql.json(DEFAULT_SETTINGS.security as never)}, ${sql.json(DEFAULT_SETTINGS.ai as never)})
     on conflict (organisation_id) do nothing`;
 
-  const email = process.env.SEED_ADMIN_EMAIL ?? "admin@hiraassociates.in";
-  const [exists] = await sql`select 1 from public.users where lower(email) = lower(${email})`;
-  if (!exists) {
+  // On hosted builds the administrator is created only from explicitly supplied credentials, so a
+  // generated password can never end up in build logs.
+  const hosted = !!process.env.VERCEL || process.env.APP_ENV === "production";
+  const email = process.env.SEED_ADMIN_EMAIL ?? (hosted ? "" : "admin@hiraassociates.in");
+  const [exists] = email ? await sql`select 1 from public.users where lower(email) = lower(${email})` : [true];
+  if (hosted && !exists && !process.env.SEED_ADMIN_PASSWORD) {
+    console.log("Super Administrator not created: set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD.");
+  } else if (!exists) {
     const password = process.env.SEED_ADMIN_PASSWORD ?? `Hira-${randomBytes(6).toString("base64url")}9!`;
     const id = await provisionUser({ email, fullName: process.env.SEED_ADMIN_NAME ?? "Prakash Patil", password, designation: "GST Consultant", sql });
     await sql`insert into public.memberships (organisation_id, user_id, role_code) values (${org.id}, ${id}, 'super_admin') on conflict do nothing`;

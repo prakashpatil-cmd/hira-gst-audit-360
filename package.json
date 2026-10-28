@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "HIRA GST Audit 360° — GST Health Check, Audit, Reconciliation and Compliance Management",
+  "description": "HIRA GST Audit 360\u00b0 \u2014 GST Health Check, Audit, Reconciliation and Compliance Management",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "if [ \"$VERCEL_ENV\" = \"production\" ]; then npm run db:migrate && npm run db:seed; fi && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "db:migrate": "tsx scripts/migrate.ts",

@@ -7,12 +7,14 @@ import { config } from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import postgres from "postgres";
+import { normaliseDbUrl } from "../src/lib/env";
 
 config({ path: process.env.DOTENV_PATH ?? ".env.local" });
 
 async function main() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL not set");
+  // DATABASE_URL, or POSTGRES_URL as written by the Supabase ↔ Vercel integration.
+  const url = normaliseDbUrl(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+  if (!url) throw new Error("DATABASE_URL (or POSTGRES_URL) not set");
   const local = process.env.DB_LOCAL_SHIM === "true";
   const reset = process.argv.includes("--reset");
   const sql = postgres(url, { max: 1, onnotice: () => {} });
